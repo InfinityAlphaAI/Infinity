@@ -1,0 +1,19 @@
+{
+  "name": "Infinity",
+  "version": "1.0.0",
+  "description": "Infinity Token implementation with OpenZeppelin",
+  "scripts": {},
+  "dependencies": {
+    "@openzeppelin/contracts": "4.6.0"
+  },
+  "keywords": [
+    "ethereum",
+    "solidity",
+    "token",
+    "erc20",
+    "hardhat"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
