@@ -4,10 +4,10 @@ pragma solidity ^0.8.10;
 import {ERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import {IPancakeRouter} from "./interfaces/IPancakeRouter.sol";
-import {IPancakeFactory} from "./interfaces/IPancakeFactory.sol";
-import {IDistributor} from "./interfaces/IDistributor.sol";
-import {IPancakePair} from "./interfaces/IPancakePair.sol";
+import {IPancakeRouter} from "../interfaces/IPancakeRouter.sol";
+import {IPancakeFactory} from "../interfaces/IPancakeFactory.sol";
+import {IDistributor} from "../interfaces/IDistributor.sol";
+import {IPancakePair} from "../interfaces/IPancakePair.sol";
 
 uint256 constant LP_MIN_BALANCE = 88888 * 1e18;
 uint256 constant MIN_TOTAL_SUPPLY = 9999999 * 1e18;
@@ -45,6 +45,8 @@ contract Token is ERC20, Ownable, ERC20Burnable {
         address _feeRobot,
         address _interaction
     ) external onlyOwner {
+        require(feeRobot == address(0), "fee robot already set");
+        require(interaction == address(0), "interaction already set");
         feeRobot = _feeRobot;
         interaction = _interaction;
         isGuardedOf[interaction] = true;
@@ -97,7 +99,9 @@ contract Token is ERC20, Ownable, ERC20Burnable {
 
                 feeAmount = amount / 2;
                 super._transfer(from, feeRobot, feeAmount);
-                IDistributor(feeRobot).distribute();
+                try IDistributor(feeRobot).distribute() {} catch {
+                    // do nothing
+                }
             }
         }
         super._transfer(from, to, amount - feeAmount);
@@ -133,7 +137,7 @@ contract Token is ERC20, Ownable, ERC20Burnable {
         if (burnAmount > 0) {
             super._burn(from, burnAmount);
         }
-        if (amount - burnAmount > 0) {
+        if (amount - burnAmount > 0 && from != pair) {
             super._transfer(from, burnReceiver, amount - burnAmount);
         }
     }
